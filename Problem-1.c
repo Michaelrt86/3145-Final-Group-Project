@@ -50,7 +50,6 @@ void main()
 
         #pragma omp for 
         //Thread Variables (Local Stuff)
-
         for(int toss = 1; toss < tossNumber; toss++)
         {
             double x = (double)rand_r(&seed) / RAND_MAX * 2.0 - 1.0;
@@ -63,5 +62,7 @@ void main()
         }
         pi_estimate = 4 * numInCircle/((double) tossNumber);
     }
+    printf("The number of tosses: %d\n", tossNumber);
+    printf("The number of darts in circle: %d\n", numInCircle);
     return;
 }
