@@ -29,16 +29,39 @@ very large to get a reasonable estimate of π.
 **/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <omp.h>
-
+#include <time.h>
 
 void main()
 {
+    //Global Variables
+    long long int tossNumber = 0;
+    
+    //srand(time(0));
 
 
+    #pragma omp parallel 
+    {
 
+        int seed = omp_get_thread_num();
+        int numInCircle = 0;
+        double pi_estimate = 0;
 
+        #pragma omp for 
+        //Thread Variables (Local Stuff)
 
-
+        for(int toss = 1; toss < tossNumber; toss++)
+        {
+            double x = (double)rand_r(&seed) / RAND_MAX * 2.0 - 1.0;
+            double y = (double)rand_r(&seed) / RAND_MAX * 2.0 - 1.0;
+            double distance_squared = (x * x) + (y * y);
+            if(distance_squared <= 1)
+            {
+                numInCircle++;
+            }
+        }
+        pi_estimate = 4 * numInCircle/((double) tossNumber);
+    }
+    return;
 }
-
