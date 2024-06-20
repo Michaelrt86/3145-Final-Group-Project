@@ -30,8 +30,12 @@ very large to get a reasonable estimate of π.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
-#include <time.h>
+
+//We use this to make sure we do not get errors whenenver we make omp calls
+#ifdef _OPENMP
+  #include <omp.h>
+  int threadNumber = omp_get_thread_num();
+#endif
 
 void main()
 {
@@ -44,7 +48,7 @@ void main()
     #pragma omp parallel 
     {
 
-        int seed = omp_get_thread_num();
+        int seed = threadNumber;
         int numInCircle = 0;
         double pi_estimate = 0;
 
