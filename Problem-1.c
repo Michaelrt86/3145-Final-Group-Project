@@ -30,45 +30,36 @@ very large to get a reasonable estimate of π.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <omp.h>
 
-//We use this to make sure we do not get errors whenenver we make omp calls
-#ifdef _OPENMP
-  #include <omp.h>
-  int threadNumber = omp_get_thread_num();
-# else
-  int threadNumber = 1;
-#endif
-
-void main()
-{
-    //Global Variables
-    long long int tossNumber = 0;
+int main() {
+    long long int number_of_tosses;
+    long long int number_in_circle = 0;
     
-    //srand(time(0));
+    printf("Enter the number of tosses: ");
+    scanf("%lld", &number_of_tosses);
 
-
-    #pragma omp parallel 
+    #pragma omp parallel
     {
+        unsigned int seed = omp_get_thread_num();
+        long long int local_number_in_circle = 0;
 
-        int seed = threadNumber;
-        int numInCircle = 0;
-        double pi_estimate = 0;
-
-        #pragma omp for 
-        //Thread Variables (Local Stuff)
-        for(int toss = 1; toss < tossNumber; toss++)
-        {
+        #pragma omp for
+        for (long long int toss = 0; toss < number_of_tosses; toss++) {
             double x = (double)rand_r(&seed) / RAND_MAX * 2.0 - 1.0;
             double y = (double)rand_r(&seed) / RAND_MAX * 2.0 - 1.0;
-            double distance_squared = (x * x) + (y * y);
-            if(distance_squared <= 1)
-            {
-                numInCircle++;
+            double distance_squared = x * x + y * y;
+            if (distance_squared <= 1) {
+                local_number_in_circle++;
             }
         }
-        pi_estimate = 4 * numInCircle/((double) tossNumber);
+
+        #pragma omp atomic
+        number_in_circle += local_number_in_circle;
     }
-    printf("The number of tosses: %d\n", tossNumber);
-    printf("The number of darts in circle: %d\n", numInCircle);
-    return;
+
+    double pi_estimate = 4.0 * (double)number_in_circle / (double)number_of_tosses;
+    printf("Estimated value of pi: %f\n", pi_estimate);
+
+    return 0;
 }
