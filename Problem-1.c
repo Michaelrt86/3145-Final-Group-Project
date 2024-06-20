@@ -35,6 +35,8 @@ very large to get a reasonable estimate of π.
 #ifdef _OPENMP
   #include <omp.h>
   int threadNumber = omp_get_thread_num();
+# else
+  int threadNumber = 1;
 #endif
 
 void main()
