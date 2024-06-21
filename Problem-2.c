@@ -3,6 +3,24 @@
   Then, after you’ve gotten this version working, modify your program so that it can handle any comm sz.
 **/
 
+/* File:  
+ *    Problem-2.c
+ *
+ * Purpose:  
+ *    To compute a tree-structured global sum that takes in any comm sz.
+ *
+ * Compile:
+ *    mpicc -o Problem-2 Problem-2.c
+ * Run:
+ *    mpiexec -n <comm_sz> ./Problem-2 <order of vector>
+ *
+ * Input:
+ *    2 integers
+ * Output:
+ *    The global sum that is calculated from the input values
+ *
+ */
+
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
