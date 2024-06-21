@@ -43,22 +43,33 @@ very large to get a reasonable estimate of π.
  *    An integer
  * Output:
  *    The estimated value of pi
- *
+ *    The number of darts within the cirlce
  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
+
+#ifdef _OPENMP
+  #include <omp.h>
+//This creates a thread number so the function can read through and 
+  int threadNumber = omp_get_thread_num();
+# else
+  int threadNumber = 1;
+#endif
+
+double random_double(unsigned int *seed);
+int is_inside_circle(double x, double y);
+double pi_estimation(long long int num_tosses);
 
 int main() {
     long long int num_tosses;
-
+    long long int numInCircle = 0;
     printf("Enter the number of tosses: ");
     scanf("%lld", &num_tosses);
 
-    double pi_estimate = monte_carlo_pi(num_tosses);
+    double pi_estimate = pi_estimation(num_tosses);
     printf("Estimated value of pi: %f\n", pi_estimate);
-
+    printf("Number of Darts within circle: %d", numInCircle);
     return 0;
 }
 
@@ -74,11 +85,11 @@ int is_inside_circle(double x, double y) {
 
 // Does the calculation to estimate pi based on the provided values 
 double pi_estimation(long long int num_tosses) {
-    long long int num_in_circle = 0;
+    long long int localInCircle = 0;
 
-    #pragma omp parallel reduction(+:num_in_circle)
+    #pragma omp parallel reduction(+:localInCircle)
     {
-        unsigned int seed = omp_get_thread_num();
+        unsigned int seed = threadNumber;
 
         #pragma omp for
         for (long long int toss = 0; toss < num_tosses; toss++) {
@@ -86,10 +97,11 @@ double pi_estimation(long long int num_tosses) {
             double y = random_double(&seed);
 
             if (is_inside_circle(x, y)) {
-                num_in_circle++;
+                localInCircle++;
+                numInCircle++;
             }
         }
     }
 
-    return 4.0 * (double)num_in_circle / (double)num_tosses;
+    return 4.0 * (double)localInCircle / (double)num_tosses;
 }
