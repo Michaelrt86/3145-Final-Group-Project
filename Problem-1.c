@@ -50,6 +50,10 @@ very large to get a reasonable estimate of π.
 #include <stdlib.h>
 #include <omp.h>
 
+double random_double(unsigned int *seed);
+int is_inside_circle(double x, double y);
+double pi_estimation(long long int num_tosses);
+
 int main() {
     long long int num_tosses;
 
