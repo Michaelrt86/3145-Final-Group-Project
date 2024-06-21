@@ -28,38 +28,68 @@ very large to get a reasonable estimate of π.
 
 **/
 
+/* File:  
+ *    Problem-1.c
+ *
+ * Purpose:  
+ *    To calculate pi using a dart board in which we track how many darts hit within a circle that is within a box. The box's side length is equal to the circle's diameter.
+ *
+ * Compile:
+ *    gcc -g -Wall -fopenmp -o Problem-1 Problem-1.c
+ * Run:
+ *    ./Problem-1
+ *
+ * Input:
+ *    An integer
+ * Output:
+ *    The estimated value of pi
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
 
 int main() {
-    long long int number_of_tosses;
-    long long int number_in_circle = 0;
-    
+    long long int num_tosses;
+
     printf("Enter the number of tosses: ");
-    scanf("%lld", &number_of_tosses);
+    scanf("%lld", &num_tosses);
 
-    #pragma omp parallel
-    {
-        unsigned int seed = omp_get_thread_num();
-        long long int local_number_in_circle = 0;
-
-        #pragma omp for
-        for (long long int toss = 0; toss < number_of_tosses; toss++) {
-            double x = (double)rand_r(&seed) / RAND_MAX * 2.0 - 1.0;
-            double y = (double)rand_r(&seed) / RAND_MAX * 2.0 - 1.0;
-            double distance_squared = x * x + y * y;
-            if (distance_squared <= 1) {
-                local_number_in_circle++;
-            }
-        }
-
-        #pragma omp atomic
-        number_in_circle += local_number_in_circle;
-    }
-
-    double pi_estimate = 4.0 * (double)number_in_circle / (double)number_of_tosses;
+    double pi_estimate = monte_carlo_pi(num_tosses);
     printf("Estimated value of pi: %f\n", pi_estimate);
 
     return 0;
+}
+
+// Randon number function for x and y
+double random_double(unsigned int *seed) {
+    return (double)rand_r(seed) / RAND_MAX * 2.0 - 1.0;
+}
+
+// Checks the value to see if the dart is in the circle
+int is_inside_circle(double x, double y) {
+    return x * x + y * y <= 1.0;
+}
+
+// Does the calculation to estimate pi based on the provided values 
+double pi_estimation(long long int num_tosses) {
+    long long int num_in_circle = 0;
+
+    #pragma omp parallel reduction(+:num_in_circle)
+    {
+        unsigned int seed = omp_get_thread_num();
+
+        #pragma omp for
+        for (long long int toss = 0; toss < num_tosses; toss++) {
+            double x = random_double(&seed);
+            double y = random_double(&seed);
+
+            if (is_inside_circle(x, y)) {
+                num_in_circle++;
+            }
+        }
+    }
+
+    return 4.0 * (double)num_in_circle / (double)num_tosses;
 }
