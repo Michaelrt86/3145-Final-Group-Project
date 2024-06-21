@@ -56,7 +56,7 @@ int main() {
     printf("Enter the number of tosses: ");
     scanf("%lld", &num_tosses);
 
-    double pi_estimate = monte_carlo_pi(num_tosses);
+    double pi_estimate = pi_estimation(num_tosses);
     printf("Estimated value of pi: %f\n", pi_estimate);
 
     return 0;
